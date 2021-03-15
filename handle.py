@@ -128,8 +128,8 @@ class Handle(object):
             elif recMsg.MsgType == 'event':
                 toUser = recMsg.FromUserName
                 fromUser = recMsg.ToUserName
-                content = recMsg.Content
-                if content == "subscribe":
+                event = recMsg.Event
+                if event == "subscribe":
                     content = self.WELCOME_SUBSCRIBE
                 else:
                     return "success"

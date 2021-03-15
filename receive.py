@@ -12,9 +12,6 @@ def parse_xml(web_data):
         return ImageMsg(xmlData)
     elif msg_type == 'event':
         return EventMsg(xmlData)
-    else:
-        print("parse_xml: can't recognize this msg_type!")
-        return None
 
 
 class Msg(object):
@@ -42,4 +39,4 @@ class ImageMsg(Msg):
 class EventMsg(Msg):
     def __init__(self, xmlData):
         Msg.__init__(self, xmlData, 2)
-        self.Content = xmlData.find('Content').text.encode("utf-8").decode('utf-8')
+        self.Event = xmlData.find('Event').text.encode("utf-8").decode('utf-8')
