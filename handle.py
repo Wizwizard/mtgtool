@@ -48,6 +48,7 @@ class Handle(object):
             deck_code = deck[1]
             for keyword_US_CN in CONSTANT.keywords_US_CN:
                 deck_name = re.sub(keyword_US_CN[0] + " ", keyword_US_CN[1], deck_name, flags=re.IGNORECASE)
+            deck_code = deck_code.replace(r"\'", "'")
             tmp_standard_list.append((deck_name, deck_code))
 
         for deck in historic_decks:
@@ -55,6 +56,7 @@ class Handle(object):
             deck_code = deck[1]
             for keyword_US_CN in CONSTANT.keywords_US_CN:
                 deck_name = re.sub(keyword_US_CN[0] + " ", keyword_US_CN[1], deck_name, flags=re.IGNORECASE)
+            deck_code = deck_code.replace(r"\'", "'")
             tmp_historic_list.append((deck_name, deck_code))
 
         self._standard_list = tmp_standard_list
