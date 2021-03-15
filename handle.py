@@ -1,4 +1,3 @@
-
 import hashlib
 import web
 import lxml
@@ -25,6 +24,14 @@ class Handle(object):
     _historic_list = db.select_deck_name_by_meta(2)
     _deck_upd_ts = math.floor(time.time())
 
+    def upd_deck_list(self):
+        cur_ts = math.floor(time.time()) 
+        if (cur_ts - self._deck_upd_ts) > 7200:
+            _standard_list = db.select_deck_name_by_meta(1)
+            _historic_list = db.select_deck_name_by_meta(2)
+            self._deck_upd_ts = cur_ts
+            
+
     def GET(self):
         try:
             data = web.input()
@@ -35,11 +42,12 @@ class Handle(object):
             nonce = data.nonce
             echostr = data.echostr
             token = "migongzhongdian"
-
-            list = [token, timestamp, nonce]
-            list.sort()
+            
+            l = [token, timestamp, nonce]
+            l.sort()
             sha1 = hashlib.sha1()
-            map(sha1.update, list)
+            sha1.update("".join(l).encode())
+            # map(sha1.update, l)
             hashcode = sha1.hexdigest()
             print("handle/GET func: hashcode, signature: ", hashcode, signature)
             if hashcode == signature:
@@ -52,7 +60,7 @@ class Handle(object):
     def POST(self):
         try:
             webData = web.data()
-            print("Handle Post webdata is ", webData)
+            # print("Handle Post webdata is ", webData)
             recMsg = receive.parse_xml(webData)
             # if isinstance(recMsg, receive.Msg) and recMsg.MsgType == 'text':
             if recMsg.MsgType == 'text':
@@ -66,7 +74,7 @@ class Handle(object):
                 print(replyMsg_send)
                 return replyMsg_send
             else:
-                print("暂且不处理")
+                # print("其他类型暂且不处理")
                 return "success"
         except Exception as Argment:
             print(Argment)
@@ -96,14 +104,14 @@ class Handle(object):
         toUser = recMsg.FromUserName
         content = recMsg.Content
         print("distribute:" + content)
-        print(self._user_list)
-        print(self._message_list)
+        # print(self._user_list)
+        # print(self._message_list)
         if content == "mtg":
             print("开门")
             if toUser not in self._user_list:
                 self._user_list.append(toUser)
-                print(self._standard_list)
-                print(self._historic_list)
+                # print(self._standard_list)
+                # print(self._historic_list)
                 level = 1
                 meta = 0
                 menu = self.META_SELECT
@@ -124,6 +132,7 @@ class Handle(object):
                 user_level = user_status[0]
                 user_menu = user_status[1]
                 user_meta = user_status[2]
+                # meta select
                 if user_level == 1:
                     if index == 0:
                         content = user_menu
@@ -141,7 +150,10 @@ class Handle(object):
                         self._user_status_list[toUser] = (user_level, user_menu, user_meta)
                     else:
                         content = "请发送菜单选项对应数字！\n发送0可以获取当前菜单"
+                # deck select
                 elif user_level == 2:
+                    # 检查牌表是否过期，过期则更新
+                    self.upd_deck_list()
                     if index == 0:
                         content = user_menu
                     elif index == -1:
