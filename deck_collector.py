@@ -36,8 +36,8 @@ def mtgazone_decks_collector():
 
 def decks_collect():
     while True:
-        mtgazone_decks_collector()
         time.sleep(14400)
+        mtgazone_decks_collector()
 
 
 decks_collect()
