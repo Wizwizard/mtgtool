@@ -17,7 +17,8 @@ class Handle(object):
     # level: 1-meta select 2-deck select
     # menu: keep current menu str
     # meta: 0-init 1-standard, 2-historic
-    META_SELECT = "输入序号查看对应环境最新20套牌\n1.标准\n2.史迹"
+    WELCOME_SUBSCRIBE = "欢迎关注迷宫终点～\n加群775482304寻找更多伙伴！\n输入神秘代码 mtg 有惊喜哦～"
+    META_SELECT = "输入序号可查看\n该赛制最新20套牌\n1.标准\n2.史迹"
     DECK_SELECT = "输入序号获取对应套牌code\n"
     _user_status_list = {}
     _user_list = []
@@ -109,9 +110,10 @@ class Handle(object):
     def POST(self):
         try:
             webData = web.data()
-            # print("Handle Post webdata is ", webData)
+            print("Handle Post webdata is ", webData)
             recMsg = receive.parse_xml(webData)
             # if isinstance(recMsg, receive.Msg) and recMsg.MsgType == 'text':
+            print(recMsg.MsgType)
             if recMsg.MsgType == 'text':
                 toUser = recMsg.FromUserName
                 fromUser = recMsg.ToUserName
@@ -121,6 +123,18 @@ class Handle(object):
                 replyMsg = reply.TextMsg(toUser, fromUser, content)
                 replyMsg_send = replyMsg.send()
                 #print(replyMsg_send)
+                return replyMsg_send
+            # 事件处理 ***需要优化***
+            elif recMsg.MsgType == 'event':
+                toUser = recMsg.FromUserName
+                fromUser = recMsg.ToUserName
+                content = recMsg.Content
+                if content == "subscribe":
+                    content = self.WELCOME_SUBSCRIBE
+                else:
+                    return "success"
+                replyMsg = reply.TextMsg(toUser, fromUser, content)
+                replyMsg_send = replyMsg.send()
                 return replyMsg_send
             else:
                 # print("其他类型暂且不处理")

@@ -23,11 +23,22 @@ data_str = '''
  <MsgId>6272960105994287618</MsgId>
 </xml>
 '''
+event_str = '''
+<xml>
+ <ToUserName><![CDATA[ToUserName]]></ToUserName>
+ <FromUserName><![CDATA[FromUserName]]></FromUserName>
+ <CreateTime>%s</CreateTime>
+ <MsgType><![CDATA[event]]></MsgType>
+ <Content><![CDATA[subscribe]]></Content>
+ <MsgId>6272960105994287618</MsgId>
+</xml>
+'''
 while True:
     content = input("input:")
     if content == "exit":
         break
-    data = data_str % content
+    # data = data_str % content
+    data = event_str % content
     response = requests.post(url, data=data)
     print(response.text)
 

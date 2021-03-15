@@ -14,7 +14,7 @@ HEARDERS = {
 
 
 def get_html_by_url(url):
-    response = requests.get(url, HEARDERS)
+    response = requests.get(url, HEARDERS, timeout=10)
     html = response.text
     return html
 
