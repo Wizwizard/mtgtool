@@ -76,7 +76,7 @@ class Handle(object):
             deck_name = deck[0]
             deck_menu += opt % (index, deck_name)
             index += 1
-        deck_menu += "0.显示当前菜单\n-1:返回环境选择"
+        deck_menu += "0.显示当前菜单\n-1.返回环境选择"
         return deck_menu
 
     def GET(self):
