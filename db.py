@@ -5,7 +5,7 @@ insert into deck_info (source, deck_name, deck_code, deck_meta, deck_color, crea
 values('%s', '%s', '%s', %s, %s, '%s', %s)'''
 SELECT_DECK_NAME_LIST_BY_META = '''
 select deck_name, deck_code from deck_info where deck_meta = '%s' order by create_ts desc limit 40'''
-conn = sqlite3.connect('mtgtool.db')
+conn = sqlite3.connect('mtgtool.db', check_same_thread=False)
 c = conn.cursor()
 
 
@@ -30,7 +30,6 @@ def select_deck_name_by_meta(deck_meta):
         decks.append((deck_name, deck_code))
 
     return decks
-
 
 
 def execute_sql(sql):

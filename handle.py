@@ -8,7 +8,8 @@ import receive
 import mtgazone_crawler
 import db
 import math
-
+import CONSTANT
+import re
 
 class Handle(object):
     _message_list = []
@@ -16,21 +17,67 @@ class Handle(object):
     # level: 1-meta select 2-deck select
     # menu: keep current menu str
     # meta: 0-init 1-standard, 2-historic
-    META_SELECT = "1.standard\n2.historic"
+    META_SELECT = "输入序号查看对应环境最新20套牌\n1.标准\n2.史迹"
+    DECK_SELECT = "输入序号获取对应套牌code\n"
     _user_status_list = {}
     _user_list = []
     _meta_list = [0, "standard", "historic"]
-    _standard_list = db.select_deck_name_by_meta(1)
-    _historic_list = db.select_deck_name_by_meta(2)
+    _standard_list = []
+    _historic_list = []
     _deck_upd_ts = math.floor(time.time())
+
+    def __init__(self):
+        self.init_deck_list()
 
     def upd_deck_list(self):
         cur_ts = math.floor(time.time()) 
         if (cur_ts - self._deck_upd_ts) > 7200:
-            _standard_list = db.select_deck_name_by_meta(1)
-            _historic_list = db.select_deck_name_by_meta(2)
+            self.init_deck_list()
             self._deck_upd_ts = cur_ts
-            
+            print("%s 套牌更新" % cur_ts)
+
+    def init_deck_list(self):
+        standard_decks = db.select_deck_name_by_meta(1)
+        historic_decks = db.select_deck_name_by_meta(2)
+
+        tmp_standard_list = []
+        tmp_historic_list = []
+
+        for deck in standard_decks:
+            deck_name = deck[0]
+            deck_code = deck[1]
+            for keyword_US_CN in CONSTANT.keywords_US_CN:
+                deck_name = re.sub(keyword_US_CN[0] + " ", keyword_US_CN[1], deck_name, flags=re.IGNORECASE)
+            tmp_standard_list.append((deck_name, deck_code))
+
+        for deck in historic_decks:
+            deck_name = deck[0]
+            deck_code = deck[1]
+            for keyword_US_CN in CONSTANT.keywords_US_CN:
+                deck_name = re.sub(keyword_US_CN[0] + " ", keyword_US_CN[1], deck_name, flags=re.IGNORECASE)
+            tmp_historic_list.append((deck_name, deck_code))
+
+        self._standard_list = tmp_standard_list
+        self._historic_list = tmp_historic_list
+
+    def is_int(self, s):
+        try:
+            int(s)
+            return True
+        except ValueError as err:
+            pass
+        return False
+
+    def deck_menu_generate(self, deck_list):
+        deck_menu = Handle.DECK_SELECT
+        index = 1
+        opt = "%s.%s\n"
+        for deck in deck_list:
+            deck_name = deck[0]
+            deck_menu += opt % (index, deck_name)
+            index += 1
+        deck_menu += "0.显示当前菜单\n-1:返回环境选择"
+        return deck_menu
 
     def GET(self):
         try:
@@ -71,7 +118,7 @@ class Handle(object):
                     return "success"
                 replyMsg = reply.TextMsg(toUser, fromUser, content)
                 replyMsg_send = replyMsg.send()
-                print(replyMsg_send)
+                #print(replyMsg_send)
                 return replyMsg_send
             else:
                 # print("其他类型暂且不处理")
@@ -79,25 +126,6 @@ class Handle(object):
         except Exception as Argment:
             print(Argment)
             return Argment
-
-    def is_int(self, s):
-        try:
-            int(s)
-            return True
-        except ValueError as err:
-            pass
-        return False
-
-    def deck_menu_generate(self, deck_list):
-        deck_menu = ""
-        index = 1
-        opt = "%s.%s\n"
-        for deck in deck_list:
-            deck_name = deck[0]
-            deck_menu += opt % (index, deck_name)
-            index += 1
-        deck_menu += "0.显示当前菜单\n-1:返回环境选择"
-        return deck_menu
 
     # 处理分配
     def distribute(self, recMsg):
@@ -138,13 +166,13 @@ class Handle(object):
                         content = user_menu
                     elif index == 1:
                         user_level = 2
-                        user_menu = self.deck_menu_generate(self._standard_list[:15])
+                        user_menu = self.deck_menu_generate(self._standard_list[:20])
                         user_meta = index
                         content = user_menu
                         self._user_status_list[toUser] = (user_level, user_menu, user_meta)
                     elif index == 2:
                         user_level = 2
-                        user_menu = self.deck_menu_generate(self._historic_list[:15])
+                        user_menu = self.deck_menu_generate(self._historic_list[:20])
                         user_meta = index
                         content = user_menu
                         self._user_status_list[toUser] = (user_level, user_menu, user_meta)
