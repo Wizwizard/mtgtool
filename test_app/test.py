@@ -1,6 +1,6 @@
 import requests
 
-url = "http://0.0.0.0:8888/wx"
+url = "http://0.0.0.0:8080/wx"
 # url = "http://47.117.130.253:8888/wx"
 
 response = requests.get(url)
